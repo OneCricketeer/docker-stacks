@@ -1,0 +1,66 @@
+version: "2"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:1.1.0-hadoop2.7.1-java8
+    container_name: namenode
+    ports:
+      - 8020:8020
+      - 50070:50070
+      # - 59050:59050
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+    networks:
+      - hadoop
+      
+  datanode1:
+    image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
+    container_name: datanode1
+    ports:
+      - 50075:50075
+      # - 50010:50010
+      # - 50020:50020
+    depends_on:
+      - namenode
+    volumes:
+      - hadoop_datanode1:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+    networks:
+      - hadoop
+
+  hue:
+    image: gethue/hue
+    container_name: hue
+    ports:
+      - 8000:8888
+    depends_on:
+      - namenode
+    volumes:
+      - ./conf/hue.ini:/hue/desktop/conf/pseudo-distributed.ini
+    networks:
+      - hadoop
+      - frontend
+
+  spark-notebook:
+    image: jupyter/pyspark-notebook
+    command: start-notebook.sh --NotebookApp.password='sha1:d2887803f259:31c1bd6d04cd68c3317e88081a6b2a89a8f7f30b'
+    ports: 
+      - 8888:8888 
+    depends_on:
+      - namenode
+    networks: 
+      - hadoop
+      - frontend
+  
+volumes:
+  hadoop_namenode:
+  hadoop_datanode1:
+
+networks:
+  hadoop:
+  frontend:
