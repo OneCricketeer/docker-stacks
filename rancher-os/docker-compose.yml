@@ -1,0 +1,22 @@
+version: '2'
+
+services:
+  registry:
+    image: registry:2
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - /Users/moorejm/.docker/registry:/var/lib/registry
+    environment:
+      REGISTRY_PROXY_REMOTEURL: https://registry-1.docker.io
+
+  rancher-server:
+    image: "localhost:5000/rancher/server:${RANCHER_SERVER_VER}"
+    environment:
+      CATTLE_BOOTSTRAP_REQUIRED_IMAGE: "jomoore.docker:5000/rancher/agent:${RANCHER_AGENT_VER}"
+      # CATTLE_DB_CATTLE_MYSQL_HOST: 
+    ports:
+      - 8080:8080
+    depends_on:
+      - registry
