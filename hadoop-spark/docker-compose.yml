@@ -1,13 +1,12 @@
-version: "2"
+version: '3'
 
 services:
   namenode:
-    image: bde2020/hadoop-namenode:1.1.0-hadoop2.7.1-java8
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
     ports:
-      - 8020:8020
-      - 50070:50070
-      # - 59050:59050
+      - 9000:9000  # Namenode RPC for HDFS clients
+      - 9870:9870  # WebUI - dfs.namenode.http-address
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
     environment:
@@ -18,18 +17,18 @@ services:
       - hadoop
       
   datanode1:
-    image: bde2020/hadoop-datanode:1.1.0-hadoop2.7.1-java8
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     container_name: datanode1
     ports:
-      - 50075:50075
-      # - 50010:50010
-      # - 50020:50020
+      - 9864:9864  # WebUI - dfs.datanode.http.address
     depends_on:
       - namenode
     volumes:
       - hadoop_datanode1:/hadoop/dfs/data
     env_file:
       - ./hadoop.env
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
     networks:
       - hadoop
 
@@ -37,20 +36,21 @@ services:
     image: gethue/hue
     container_name: hue
     ports:
-      - 8000:8888
+      - 8000:8888  # WebUI
     depends_on:
       - namenode
     volumes:
-      - ./conf/hue.ini:/hue/desktop/conf/pseudo-distributed.ini
+      - ./conf/hue.ini:/usr/share/hue/desktop/conf/z-hue.ini
     networks:
       - hadoop
       - frontend
 
   spark-notebook:
     image: jupyter/pyspark-notebook
-    command: start-notebook.sh --NotebookApp.password='sha1:d2887803f259:31c1bd6d04cd68c3317e88081a6b2a89a8f7f30b'
+    command: start-notebook.sh --ServerApp.password='sha1:d2887803f259:31c1bd6d04cd68c3317e88081a6b2a89a8f7f30b'
     ports: 
-      - 8888:8888 
+      - 8888:8888  # WebUI
+      - 4040:4040  # Spark WebUI when local session started 
     depends_on:
       - namenode
     networks: 
