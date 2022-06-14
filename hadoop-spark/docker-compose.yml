@@ -21,6 +21,7 @@ services:
     container_name: datanode1
     ports:
       - 9864:9864  # WebUI - dfs.datanode.http.address
+      - 9866:9866  # Data transfer - dfs.datanode.address
     depends_on:
       - namenode
     volumes:
@@ -53,6 +54,8 @@ services:
       - 4040:4040  # Spark WebUI when local session started 
     depends_on:
       - namenode
+    volumes:
+      - ./spark-notebooks:/home/jovyan/work
     networks: 
       - hadoop
       - frontend
