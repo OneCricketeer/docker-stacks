@@ -11,7 +11,7 @@ services:
     volumes:
       - 'zookeeper_data:/bitnami/zookeeper'
   kafka:
-    image: bitnami/kafka:3.2.0
+    image: bitnami/kafka:3.3.1
     depends_on:
       - zookeeper
     restart: unless-stopped
@@ -24,20 +24,19 @@ services:
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
       - KAFKA_CFG_DELETE_TOPIC_ENABLE=true
       - KAFKA_CFG_LOG_RETENTION_HOURS=48  # 2 days of retention for demo purposes
-      # https://rmoff.net/2018/08/02/kafka-listeners-explained/
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       - KAFKA_CFG_LISTENERS=PLAINTEXT://:29092,PLAINTEXT_HOST://0.0.0.0:9092
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
 
   nifi:
-    image: apache/nifi:1.16.3
+    image: apache/nifi:1.18.0
     ports:
       - 8443:8443
     environment:
-      - NIFI_ZK_CONNECT_STRING=zookeeper:2181
-      - NIFI_ZK_ROOT_NODE=/nifi
-      - SINGLE_USER_CREDENTIALS_USERNAME=admin
-      - SINGLE_USER_CREDENTIALS_PASSWORD=ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB
+      NIFI_ZK_CONNECT_STRING: zookeeper:2181
+      NIFI_ZK_ROOT_NODE: /nifi
+      SINGLE_USER_CREDENTIALS_USERNAME: admin
+      SINGLE_USER_CREDENTIALS_PASSWORD: 'ctsBtRBKHRAx69EqUghvvgEvjnaLjFEB'
     # TODO: add volumes to save templates, scripts, and stuff
 
 volumes:
